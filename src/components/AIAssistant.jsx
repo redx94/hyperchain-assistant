@@ -1,44 +1,60 @@
 import React, { useState } from 'react';
-import { MessageSquareIcon, SendIcon } from 'lucide-react';
+import { MessageSquareIcon, SendIcon, XIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { ScrollArea } from './ui/scroll-area';
 
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [conversation, setConversation] = useState([]);
 
   const handleSendMessage = () => {
-    // TODO: Implement AI assistant logic
-    console.log('Sending message:', message);
-    setMessage('');
+    if (message.trim()) {
+      setConversation([...conversation, { type: 'user', content: message }]);
+      // TODO: Implement AI response logic
+      const aiResponse = "I'm an AI assistant. How can I help you with blockchain tasks?";
+      setConversation(prev => [...prev, { type: 'ai', content: aiResponse }]);
+      setMessage('');
+    }
   };
 
   return (
-    <div className="fixed bottom-4 right-4">
+    <div className="fixed bottom-4 right-4 z-50">
       {isOpen ? (
-        <div className="bg-white rounded-lg shadow-xl p-4 w-80">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">AI Assistant</h3>
+        <Card className="w-96 h-[500px] flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">AI Assistant</CardTitle>
             <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
-              <MessageSquareIcon size={20} />
+              <XIcon size={20} />
             </Button>
-          </div>
-          <div className="h-64 overflow-y-auto mb-4 bg-gray-100 rounded p-2">
-            {/* TODO: Display conversation history */}
-          </div>
-          <div className="flex">
-            <Input
-              type="text"
-              placeholder="Ask a question..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="flex-grow mr-2"
-            />
-            <Button onClick={handleSendMessage}>
-              <SendIcon size={20} />
-            </Button>
-          </div>
-        </div>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[380px] pr-4">
+              {conversation.map((msg, index) => (
+                <div key={index} className={`mb-4 ${msg.type === 'user' ? 'text-right' : 'text-left'}`}>
+                  <span className={`inline-block p-2 rounded-lg ${msg.type === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                    {msg.content}
+                  </span>
+                </div>
+              ))}
+            </ScrollArea>
+            <div className="flex mt-4">
+              <Input
+                type="text"
+                placeholder="Ask about blockchain..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                className="flex-grow mr-2"
+              />
+              <Button onClick={handleSendMessage}>
+                <SendIcon size={20} />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <Button onClick={() => setIsOpen(true)}>
           <MessageSquareIcon size={20} className="mr-2" />
